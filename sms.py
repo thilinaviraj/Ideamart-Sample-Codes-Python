@@ -3,9 +3,9 @@ from flask import *
 
 import logging
 
+import urllib.request
 from urllib.request import urlopen
-html = urlopen("http://www.google.com/")
-print(html)
+
 
 app = Flask(__name__)
 app.debug = True
@@ -23,7 +23,6 @@ def sms_receiver():
     :return:
     """
 
-
     if request.method == "GET":
         response = make_response("Telco App is running")
         response.headers['Content-Type'] = 'application/json'
@@ -31,20 +30,28 @@ def sms_receiver():
         return response
     else:
         ideamart_message = json.loads(request.data)
+        with open("Output.txt", "w") as text_file:
+            print("Purchase Amount: {}".format(ideamart_message), file=text_file)
         name = ideamart_message["message"].split(" ")[1]
         res = {'message': "Hi, " + name,
-               "destinationAddresses": ideamart_message["sourceAddress"],
+               "destinationAddresses": ideamart_message["sourceAddress"].split(" ")[0],
                "password": "password",  # This should be replaced with your ideamart app password
                "applicationId": ideamart_message["applicationId"]
                }
 
+        with open("sendSMS.txt", "w") as text_file:
+            print("Purchase Amount: {}".format(res), file=text_file)
         # URL should be  changed to https://api.dialog.lk/sms/send when you host the application
         url = "http://localhost:5000/sms/send"
-        req = urllib.request.Request(url, data=json.dumps(res),
-                              headers={"Content-Type": "application/json", "Accept": "application/json"})
-        response = urllib2.urlopen(req)
+        res = res.encode('encoding')
+
+        req = urllib.request.Request(url, data=json.dumps(res),headers={"Content-Type": "application/json", "Accept": "application/json"})
+        response = urlopen(req)
         ideamart_respones = response.read()
         logging.error("Result content: " + ideamart_respones)
+        with open("errorlog.txt", "w") as text_file:
+            print("Purchase Amount: {}".format(ideamart_respones), file=text_file)
+
 
         if response.getcode() == 200:
             logging.info('*** Message delivered Successfully! ****')
