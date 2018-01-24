@@ -24,7 +24,7 @@ def caas_request():
                "subscriberId": "94777123456", # Use the MSISDN in the format you received
                "currency": "LKR"
                }
-        with open("CAAS.txt", "w") as text_file:
+        with open("CAASRequest.txt", "w") as text_file:
             print("CAAS request: {}".format(res), file=text_file)
         url = "http://localhost:7000/caas/balance/query" # Use production API end point in the live system
 
